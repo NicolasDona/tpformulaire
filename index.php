@@ -23,7 +23,7 @@
         <h1 class="font-title text-center fw-bold mt-5">Inscription</h1>
         <div class="row pt-3 mb-5">
             <div class="col-lg-8 offset-lg-2 col-12 pt-5">
-                <form>
+                <form method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
@@ -33,9 +33,10 @@
                                     <option value="madame">Madame</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="profile_photo regular">Photo de profil</label><br>
-                                <input id="image" class="select-style regular" type="file" name="profile_photo" placeholder="Photo" required="" capture>
+                            <div class="col-md-6 mt-1">
+                                <span class="regular">Photo de profil</span><br>
+                                <label for="image" class="custom-file-upload">Choisir un fichier</label><br>
+                                <input id="image" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="profile_photo" placeholder="Photo" required="" capture style="display: none;">
                             </div>
                         </div>
                     </div>
@@ -60,7 +61,7 @@
                                         </select>
                                         <span class="regular">&nbsp;Lieu de naissance</span>
                                         <select name="country" id="country" class="select-style">
-                                            <option value="France">France</option>
+                                            <option selected value="France">France</option>
                                             <option value="Belgique">Belgique</option>
                                             <option value="Suisse">Suisse</option>
                                             <option value="Luxembourg">Luxembourg</option>
@@ -109,11 +110,11 @@
                         <div class="row">
                             <div class="col-md-9">
                                 <label for="langage" class="regular">Quel langages web connaissez-vous?</label>
-                                <input id="langage" class="form-control" type="text" name="" placeholder="HTML/CSS, PHP, Javascript, Python, Autres">
+                                <input id="langage" class="form-control" type="text" name="langage" placeholder="HTML/CSS, PHP, Javascript, Python, Autres">
                             </div>
                             <div class="col-md-3">
                                 <label for="cp" class="regular">Code postal</label>
-                                <input id="cp" pattern="[0-9]{5}" class="form-control" type="text" name="" placeholder="Entrer votre code postal">
+                                <input id="cp" pattern="[0-9]{5}" class="form-control" type="text" name="cp" placeholder="Entrer votre code postal">
                             </div>
                         </div>
                     </div>
@@ -121,7 +122,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <label for="xp" class="regular">Racontez une expérience avec la programmation et/ou l'informatique que vous auriez pu avoir.</label>
-                                <textarea id="xp" class="form-control" type="text-area" name="" placeholder="Racontez votre expérience" minlength="50"></textarea>
+                                <textarea id="xp" class="form-control" type="text-area" name="xp" placeholder="Racontez votre expérience (100 caractères minimum)" minlength="100"></textarea>
                             </div>
                         </div>
                     </div>
