@@ -1,0 +1,101 @@
+/* Global */
+body {
+    background-color: #1b263b;
+    margin: 0px;
+    padding: 0px;
+}
+
+td tr {
+    background-color: #1b263b;
+}
+
+hr {
+    color: e0e1dd;
+    width: 15%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.font-title {
+    font-family: 'Playfair+Display', serif;
+    color: #e0e1dd;
+}
+
+.regular {
+    font-family: Lato;
+    color: #e0e1dd;
+}
+
+.text-gold {
+    color: #B87333;
+}
+
+/* Combinaison des classes (avec text-decoration-none) pour créer des liens qui sont soulignés au survol.
+/* ATTENTION: j'ai placé !important dans mon style (risque d'ecrasement d'autres styles) */
+.hover-underline:hover {
+    text-decoration: underline !important;
+}
+
+/* fin de Global */
+
+/* header */
+
+
+/* fin de header */
+
+/* main */
+#dash-options {
+    list-style-type: none;
+}
+
+/* début section Accueil */
+.title-resize {
+    font-size: 485%;
+}
+
+.title-resize {
+    font-size: 300%;
+}
+
+.text-center-vertical {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 60vh;
+    /* 100% de la hauteur de la vue (viewport) */
+}
+
+/* inscription */
+
+
+
+/* formulaire de contact */
+::placeholder {
+    font-size: 80%;
+}
+
+.btn-form {
+    background: #1b263b;
+    color: #e0e1dd;
+    border: 1px solid;
+}
+
+.btn-form:hover {
+    background: #386641;
+    color: #e0e1dd;
+}
+
+.form-check-label {
+    color: #e0e1dd;
+    font-style: italic;
+}
+
+.select-style {
+    border-radius: 5px;
+    height: 39px;
+}    
+
+
+/* fin section Accueil */
+
+/* footer */
