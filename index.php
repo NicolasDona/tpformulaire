@@ -1,4 +1,5 @@
 <?php
+// Nettoyage et verification du Nom
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lastname = filter_input(INPUT_POST, 'lastname', FILTER_SANITIZE_SPECIAL_CHARS);
     if (empty($lastname)) {
@@ -18,12 +19,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $isOk = filter_var($email, FILTER_VALIDATE_EMAIL);
         if (!$isOk) {
-            $emailError = 'Le mail n\'est pas valide!';
+            $emailError = 'Le mail n\'est pas valide !';
+        }
+    }
+}
+// Nettoyage et verification du lien
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $linkedin = filter_input(INPUT_POST, 'linkedin', FILTER_SANITIZE_URL);
+    if (empty($linkedin)) {
+        $linkedinError = 'Le lien n\'est pas renseignée !';
+    } else {
+        $isOk = filter_var($linkedin, FILTER_VALIDATE_EMAIL);
+        if (!$isOk) {
+            $linkedinError = 'Le lien n\'est pas valide !';
         }
     }
 }
 ?>
-<span class="regular"><?php var_dump($email); ?></span>;
+<span class="regular"><?= var_dump($linkedinError); ?></span>;
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -34,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Font Playfair Display class="font-title"  pour les titres -->
-    <!-- font Lato class="regular" pour l'écriture réguilère -->
+    <!-- font Lato class="regular" pour l'écriture régulière -->
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <!-- style CSS perso -->
@@ -142,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="col-md-6">
                                 <label for="linkedin" class="regular mt-2">Lien vers LinkedIn</label>
                                 <input id="linkedin" class="form-control" type="url" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
+                                <span class="regular"><?php echo $linkedinError ?? ''; ?></span>
                             </div>
                         </div>
                     </div>
