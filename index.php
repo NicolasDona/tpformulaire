@@ -1,3 +1,29 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $lastname = filter_input(INPUT_POST, 'lastname', FILTER_SANITIZE_SPECIAL_CHARS);
+    if (empty($lastname)) {
+        $lastnameError = 'La donnée n\'est pas renseignée !';
+    } else {
+        $isOk = filter_var($lastname, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => "/^[a-zA-Zéèôàîï \-]{2,50}$/")));
+        if (!$isOk) {
+            $lastnameError = 'La donnée n\'est pas valide!';
+        }
+    }
+}
+// Nettoyage et verification de l'email
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    if (empty($email)) {
+        $emailError = 'Le mail n\'est pas renseignée !';
+    } else {
+        $isOk = filter_var($email, FILTER_VALIDATE_EMAIL);
+        if (!$isOk) {
+            $emailError = 'Le mail n\'est pas valide!';
+        }
+    }
+}
+?>
+<span class="regular"><?php var_dump($email); ?></span>;
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -23,7 +49,7 @@
         <h1 class="font-title text-center fw-bold mt-5">Inscription</h1>
         <div class="row pt-3 mb-5">
             <div class="col-lg-8 offset-lg-2 col-12 pt-5">
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" novalidate>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
@@ -35,16 +61,17 @@
                             </div>
                             <div class="col-md-6 mt-1">
                                 <span class="regular">Photo de profil</span><br>
-                                <label for="image" class="custom-file-upload">Choisir un fichier</label><br>
-                                <input id="image" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="profile_photo" required="required" capture="user" style="display: none;">
+                                <label for="picture" class="custom-file-upload">Choisir un fichier</label><br>
+                                <input id="picture" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="picture" required="required" capture="user" style="display: none;">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
-                                <label for="name" class="regular">Nom</label>
-                                <input id="name" class="form-control" pattern="^[a-zA-Zéèçà]{2,50}(-| )?([A-Za-zéèçà]{2,50})?$" type="text" name="name" placeholder="Entrer votre nom" minlength="2" maxlength="40" >
+                                <label for="lastname" class="regular">Nom</label>
+                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
+                                <span class="regular"><?php echo $lastnameError ?? ''; ?></span>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -108,7 +135,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="email" class="form-label regular">Email</label>
-                                <input type="email" class="form-control border" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email" minlength="2" required="required">
+                                <input type="email" class="form-control border"  name="email" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email" minlength="2" required="required">
+                                <span class="regular"><?php echo $emailError ?? ''; ?></span>
                                 <div id="emailHelp" class="form-text error d-none">Cet email n'est pas valide</div>
                             </div>
                             <div class="col-md-6">
@@ -122,15 +150,15 @@
                             <div class="col-md-9 regular">
                                 <p class="regular mt-1">Quel langages web connaissez-vous?</p>
                                 <div class="m0 checkbox-style"><input type="checkbox" id="html" name="html" value="html">
-                                <label for="html">HTML/CSS</label>
-                                <input type="checkbox" id="php" name="php" value="php">
-                                <label for="php">PHP</label>
-                                <input type="checkbox" id="js" name="js" value="js">
-                                <label for="js">Javascript</label>
-                                <input type="checkbox" id="python" name="python" value="python">
-                                <label for="python">Python</label>
-                                <input type="checkbox" id="other" name="other" value="other">
-                                <label for="other">Autres</label>
+                                    <label for="html">HTML/CSS</label>
+                                    <input type="checkbox" id="php" name="php" value="php">
+                                    <label for="php">PHP</label>
+                                    <input type="checkbox" id="js" name="js" value="js">
+                                    <label for="js">Javascript</label>
+                                    <input type="checkbox" id="python" name="python" value="python">
+                                    <label for="python">Python</label>
+                                    <input type="checkbox" id="other" name="other" value="other">
+                                    <label for="other">Autres</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -160,8 +188,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
     <!-- JS PERSO -->
-    <script src="./public/assets/js/script.js"></script>
-    <script src="./public/assets/js/reg.js"></script>
+    <!-- <script src="./public/assets/js/script.js"></script>
+    <script src="./public/assets/js/reg.js"></script> -->
 </body>
 
 </html>
