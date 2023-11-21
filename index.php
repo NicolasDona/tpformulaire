@@ -36,25 +36,36 @@
                             <div class="col-md-6 mt-1">
                                 <span class="regular">Photo de profil</span><br>
                                 <label for="image" class="custom-file-upload">Choisir un fichier</label><br>
-                                <input id="image" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="profile_photo" placeholder="Photo" required="" capture style="display: none;">
+                                <input id="image" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="profile_photo" required="required" capture="user" style="display: none;">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
-                                <label for="nom" class="regular">Nom</label>
-                                <input id="nom" class="form-control" type="text" name="" placeholder="Entrer votre nom">
+                                <label for="name" class="regular">Nom</label>
+                                <input id="name" class="form-control" pattern="^[a-zA-Zéèçà]{2,50}(-| )?([A-Za-zéèçà]{2,50})?$" type="text" name="name" placeholder="Entrer votre nom" minlength="2" maxlength="40" >
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="username" class="form-label regular mb-0">Date de naissance</label>
+                                    <label for="day" class="form-label regular mb-0">Date de naissance</label>
                                     <div>
                                         <select name="day" id="day" class="select-style">
                                             <option value="day">jour</option>
                                         </select>
                                         <select name="month" id="month" class="select-style">
-                                            <option value="month">mois</option>
+                                            <option value="janvier">Janvier</option>
+                                            <option value="février">février</option>
+                                            <option value="mars">mars</option>
+                                            <option value="avril">avril</option>
+                                            <option value="mai">mais</option>
+                                            <option value="juin">juin</option>
+                                            <option value="juillet">juillet</option>
+                                            <option value="août">août</option>
+                                            <option value="septembre">septembre</option>
+                                            <option value="octobre">octobre</option>
+                                            <option value="novembre">novembre</option>
+                                            <option value="décembre">décembre</option>
                                         </select>
                                         <select name="year" id="year" class="select-style">
                                             <option value="year">année</option>
@@ -79,7 +90,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="password1" class="form-label regular">Mot de passe</label>
-                                <input type="password" class="form-control" id="password1" placeholder="Entrer votre mot de passe">
+                                <input type="password" class="form-control" id="password1" placeholder="Entrer votre mot de passe" minlength="2" required="required">
                                 <div id="nudge">
                                     <span class="badge  regular d-none">Faible</span>
                                     <span class="badge  regular d-none">Moyen</span>
@@ -88,7 +99,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="password2" class="form-label regular">Confirmation du mot de passe</label>
-                                <input type="password" class="form-control" id="password2" placeholder="Confirmer votre mot de passe">
+                                <input type="password" class="form-control" id="password2" placeholder="Confirmer votre mot de passe" minlength="2" required="required">
                                 <div id="password2Help" class="form-text regular d-none">Les mots de passe doivent correspondre</div>
                             </div>
                         </div>
@@ -97,24 +108,34 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="email" class="form-label regular">Email</label>
-                                <input type="email" class="form-control border" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email">
+                                <input type="email" class="form-control border" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email" minlength="2" required="required">
                                 <div id="emailHelp" class="form-text error d-none">Cet email n'est pas valide</div>
                             </div>
                             <div class="col-md-6">
-                                <label for="link" class="regular mt-2">Lien vers LinkedIn</label>
-                                <input id="link" class="form-control" type="url" name="" placeholder="Entrer votre lien vers LinkedIn">
+                                <label for="linkedin" class="regular mt-2">Lien vers LinkedIn</label>
+                                <input id="linkedin" class="form-control" type="url" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-md-9">
-                                <label for="langage" class="regular">Quel langages web connaissez-vous?</label>
-                                <input id="langage" class="form-control" type="text" name="langage" placeholder="HTML/CSS, PHP, Javascript, Python, Autres">
+                            <div class="col-md-9 regular">
+                                <p class="regular mt-1">Quel langages web connaissez-vous?</p>
+                                <div class="m0 checkbox-style"><input type="checkbox" id="html" name="html" value="html">
+                                <label for="html">HTML/CSS</label>
+                                <input type="checkbox" id="php" name="php" value="php">
+                                <label for="php">PHP</label>
+                                <input type="checkbox" id="js" name="js" value="js">
+                                <label for="js">Javascript</label>
+                                <input type="checkbox" id="python" name="python" value="python">
+                                <label for="python">Python</label>
+                                <input type="checkbox" id="other" name="other" value="other">
+                                <label for="other">Autres</label>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label for="cp" class="regular">Code postal</label>
-                                <input id="cp" pattern="[0-9]{5}" class="form-control" type="text" name="cp" placeholder="Entrer votre code postal">
+                                <input id="cp" pattern="[0-9]{5}" class="form-control" type="text" name="cp" placeholder="Entrer votre code postal" required="required">
                             </div>
                         </div>
                     </div>
@@ -122,7 +143,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <label for="xp" class="regular">Racontez une expérience avec la programmation et/ou l'informatique que vous auriez pu avoir.</label>
-                                <textarea id="xp" class="form-control" type="text-area" name="xp" placeholder="Racontez votre expérience (100 caractères minimum)" minlength="100"></textarea>
+                                <textarea id="xp" class="form-control" name="xp" placeholder="Racontez votre expérience (100 caractères minimum)" minlength="100" required="required"></textarea>
                             </div>
                         </div>
                     </div>

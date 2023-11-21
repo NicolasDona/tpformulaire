@@ -57,7 +57,6 @@ hr {
     flex-direction: column;
     justify-content: center;
     height: 60vh;
-    /* 100% de la hauteur de la vue (viewport) */
 }
 
 /* inscription */
@@ -88,6 +87,8 @@ hr {
 .select-style {
     border-radius: 5px;
     height: 39px;
+    font-family: Lato;
+    font-size: 80%;
 }   
 
 .custom-file-upload {
@@ -96,6 +97,11 @@ hr {
     cursor: pointer;
     background-color: #f8f8f8;
     border-radius: 5px;
+    font-family: Lato;
+    font-size: 80%;
+}
+input[type=checkbox] {
+	margin: 4px 3px 3px 4px;
 }
 
 
