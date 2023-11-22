@@ -1,42 +1,78 @@
+<!-- language date civilité mdp photo xpérience -->
 <?php
+define('POSTAL_CODE','^[0-9]{5}$');
 // Nettoyage et verification du Nom
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $errors = array();
     $lastname = filter_input(INPUT_POST, 'lastname', FILTER_SANITIZE_SPECIAL_CHARS);
     if (empty($lastname)) {
-        $lastnameError = 'La donnée n\'est pas renseignée !';
+        $errors['lastname'] = 'La donnée n\'est pas renseignée !';
     } else {
         $isOk = filter_var($lastname, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => "/^[a-zA-Zéèôàîï \-]{2,50}$/")));
         if (!$isOk) {
-            $lastnameError = 'La donnée n\'est pas valide!';
+            $errors['lastname'] = 'La donnée n\'est pas valide!';
         }
     }
-}
+// Nettoyage et récupération du pays de naissance
+    $tabCountry = ['France', 'Belgique', 'Suisse', 'Luxembourg', 'Allemagne', 'Italie', 'Espagne', 'Portugal'];
+    $country = filter_input(INPUT_POST, 'country', FILTER_SANITIZE_SPECIAL_CHARS);
+    if (empty($country)) {
+        $errors['country'] = 'Le pays n\'est pas renseignée !';
+    } else {
+        if (!in_array($country, $tabCountry)) {
+            $errors['country'] = 'Le pays n\'est pas valide!';
+        }
+    }
 // Nettoyage et verification de l'email
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     if (empty($email)) {
-        $emailError = 'Le mail n\'est pas renseignée !';
+        $errors['email'] = 'Le mail n\'est pas renseignée !';
     } else {
         $isOk = filter_var($email, FILTER_VALIDATE_EMAIL);
         if (!$isOk) {
-            $emailError = 'Le mail n\'est pas valide !';
+            $errors['email'] = 'Le mail n\'est pas valide !';
         }
     }
-}
-// Nettoyage et verification du lien
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Nettoyage et vérification de la date dans le format "Y-m-d"
+    // $birthday = filter_input(INPUT_POST, 'birthday',FILTER_SANITIZE_NUMBER_INT);
+    // if (empty($birthday)) {
+    //     $errors['birthday'] = 'La date n\'est pas renseignée !';
+    // } else {
+    //     $isOk = filter_var($birthday,);
+    //     if (!$isOk) {
+    //         $errors['birthday'] = 'la date n\'est pas valide !';
+    //     }
+    // }
+// Nettoyage et vérification du lien
     $linkedin = filter_input(INPUT_POST, 'linkedin', FILTER_SANITIZE_URL);
     if (empty($linkedin)) {
-        $linkedinError = 'Le lien n\'est pas renseignée !';
+        $errors['linkedin'] = 'Le lien n\'est pas renseignée !';
     } else {
-        $isOk = filter_var($linkedin, FILTER_VALIDATE_EMAIL);
+        $isOk = filter_var($linkedin, FILTER_VALIDATE_URL);
         if (!$isOk) {
-            $linkedinError = 'Le lien n\'est pas valide !';
+            $errors['linkedin'] = 'Le lien n\'est pas valide !';
+        } else {
+            // Extraction du domaine de l'URL avec le shéma
+            $domain = parse_url($linkedin, PHP_URL_HOST);
+            // Vérification si le domaine est linkedin.com
+            if ($domain != 'www.linkedin.com' && $domain != 'linkedin.com') {
+                $errors['linkedin'] = 'Le lien doit être un lien LinkedIn valide !';
+            }
         }
+    
+}
+// Nettoyage et verification du code postal
+    $cp = filter_input(INPUT_POST, 'cp', FILTER_SANITIZE_NUMBER_INT);
+    if (!empty($cp)) {
+        $isOk = filter_var($cp, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => '/'.POSTAL_CODE.'/')));
+    }
+    if (!$isOk) {
+        $errors['cp'] = 'Le code postal n\'est pas valide!';
     }
 }
 ?>
-<span class="regular"><?= var_dump($linkedinError); ?></span>;
+<span class="regular"><?=var_dump($birthday); ?></span>;
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -62,9 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h1 class="font-title text-center fw-bold mt-5">Inscription</h1>
         <div class="row pt-3 mb-5">
             <div class="col-lg-8 offset-lg-2 col-12 pt-5">
+                <!-- formulaire méthode POST -->
                 <form method="post" enctype="multipart/form-data" novalidate>
                     <div class="form-group">
                         <div class="row">
+                            <!-- Formulaire civilité -->
                             <div class="col-md-6">
                                 <label for="civil" class="form-label regular mb-0">Civilité</label><br>
                                 <select name="civil" id="civil" class="select-style">
@@ -72,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <option value="madame">Madame</option>
                                 </select>
                             </div>
+                            <!-- Formulaire photo de profil -->
                             <div class="col-md-6 mt-1">
                                 <span class="regular">Photo de profil</span><br>
                                 <label for="picture" class="custom-file-upload">Choisir un fichier</label><br>
@@ -79,40 +118,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
                     </div>
+                    <!-- Formulaire pour le nom -->
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="lastname" class="regular">Nom</label>
-                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
-                                <span class="regular"><?php echo $lastnameError ?? ''; ?></span>
+                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" value="<?= $lastname ?? ''; ?>" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
+                                <span class="regular"><?=$errors['lastname'] ?? ''; ?></span>
                             </div>
                             <div class="col-md-6">
+                                <!-- Formulaire pour la date de naissance -->
                                 <div class="mb-3">
-                                    <label for="day" class="form-label regular mb-0">Date de naissance</label>
+                                    <label for="birthday" class="form-label regular mb-0">Date de naissance</label>
                                     <div>
-                                        <select name="day" id="day" class="select-style">
-                                            <option value="day">jour</option>
-                                        </select>
-                                        <select name="month" id="month" class="select-style">
-                                            <option value="janvier">Janvier</option>
-                                            <option value="février">février</option>
-                                            <option value="mars">mars</option>
-                                            <option value="avril">avril</option>
-                                            <option value="mai">mais</option>
-                                            <option value="juin">juin</option>
-                                            <option value="juillet">juillet</option>
-                                            <option value="août">août</option>
-                                            <option value="septembre">septembre</option>
-                                            <option value="octobre">octobre</option>
-                                            <option value="novembre">novembre</option>
-                                            <option value="décembre">décembre</option>
-                                        </select>
-                                        <select name="year" id="year" class="select-style">
-                                            <option value="year">année</option>
-                                        </select>
-                                        <span class="regular">&nbsp;Lieu de naissance</span>
+                                        <input type="date" id="birthday" name="birthday" class="select-style">
+                                        <span class="regular"><?= $errors['birthdate'] ?? ''; ?></span>
+                                        <!-- Formulaire pour le lieu de naissance -->
+                                        <label for="country" class="regular">Lieu de naissance</label>
                                         <select name="country" id="country" class="select-style">
-                                            <option selected value="France">France</option>
+                                            <option value="France">France</option>
                                             <option value="Belgique">Belgique</option>
                                             <option value="Suisse">Suisse</option>
                                             <option value="Luxembourg">Luxembourg</option>
@@ -121,6 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <option value="Espagne">Espagne</option>
                                             <option value="Portugal">Portugal</option>
                                         </select>
+                                        <span class="regular"><?=$errors['country'] ?? ''; ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -129,8 +154,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
+                                <!-- Premier champ pour le mot de passe -->
                                 <label for="password1" class="form-label regular">Mot de passe</label>
-                                <input type="password" class="form-control" id="password1" placeholder="Entrer votre mot de passe" minlength="2" required="required">
+                                <input type="password1" class="form-control" id="password1" name="password1" placeholder="Entrer votre mot de passe" minlength="2" required="required">
                                 <div id="nudge">
                                     <span class="badge  regular d-none">Faible</span>
                                     <span class="badge  regular d-none">Moyen</span>
@@ -138,8 +164,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </div>
                             </div>
                             <div class="col-md-6">
+                                <!-- Deuxième champ pour le mot de passe -->
                                 <label for="password2" class="form-label regular">Confirmation du mot de passe</label>
-                                <input type="password" class="form-control" id="password2" placeholder="Confirmer votre mot de passe" minlength="2" required="required">
+                                <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirmer votre mot de passe" minlength="2" required="required">
                                 <div id="password2Help" class="form-text regular d-none">Les mots de passe doivent correspondre</div>
                             </div>
                         </div>
@@ -147,15 +174,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-6">
+                                <!-- Champ pour l'email -->
                                 <label for="email" class="form-label regular">Email</label>
-                                <input type="email" class="form-control border"  name="email" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email" minlength="2" required="required">
-                                <span class="regular"><?php echo $emailError ?? ''; ?></span>
+                                <input type="email" class="form-control border" name="email" value="<?= $email ?? ''; ?>" id="email" aria-describedby="emailHelp" placeholder="Entrer votre adresse email" minlength="2" required="required">
+                                <span class="regular"><?= $errors['email'] ?? ''; ?></span>
                                 <div id="emailHelp" class="form-text error d-none">Cet email n'est pas valide</div>
                             </div>
+                            <!-- Champ pour l'url LinkedIn -->
                             <div class="col-md-6">
                                 <label for="linkedin" class="regular mt-2">Lien vers LinkedIn</label>
-                                <input id="linkedin" class="form-control" type="url" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
-                                <span class="regular"><?php echo $linkedinError ?? ''; ?></span>
+                                <input id="linkedin" class="form-control" type="url" value="<?= $linkedin ?? ''; ?>" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
+                                <span class="regular"><?= $errors['linkedin'] ?? ''; ?></span>
                             </div>
                         </div>
                     </div>
@@ -176,8 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </div>
                             </div>
                             <div class="col-md-3">
+                                <!-- formulaire pour le code postal -->
                                 <label for="cp" class="regular">Code postal</label>
-                                <input id="cp" pattern="[0-9]{5}" class="form-control" type="text" name="cp" placeholder="Entrer votre code postal" required="required">
+                                <input id="cp" pattern="<?=POSTAL_CODE?>" class="form-control" value="<?= $cp ?? ''; ?>" type="text" name="cp" placeholder="Entrer votre code postal" autocomplete="postal-code" inputmode="numeric">
+                                <span class="regular"><?= $errors['cp'] ?? ''; ?></span>
                             </div>
                         </div>
                     </div>
