@@ -3,6 +3,14 @@
 // constantes
 define('POSTAL_CODE', '^[0-9]{5}$');
 // Variables
+// Tableau des options de langages de programmation
+$langages = [
+    'html' => 'HTML/CSS',
+    'php' => 'PHP',
+    'js' => 'Javascript',
+    'python' => 'Python',
+    'other' => 'Autres'
+];
 $tabCountry = ['France', 'Belgique', 'Suisse', 'Luxembourg', 'Allemagne', 'Italie', 'Espagne', 'Portugal'];
 $SelectedMonth = ['Janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'Septembre', 'Octobre', 'novembre', 'décembre'];
 // Variables pour les sélecteurs de date - (essayer de les mettres en dynamique +10 -10)
@@ -21,6 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$isOk) {
             $errors['lastname'] = 'La donnée n\'est pas valide!';
         }
+    }
+    // verification checkbox
+    $selectedLangages = [];
+
+    // Parcourez le tableau des langages et vérifiez chaque case à cocher
+    foreach ($langages as $key => $value) {
+        if (!empty($_POST[$key])) {
+            // Ajoutez le langage au tableau s'il est coché
+            $selectedLangages[$key] = $value;
+        }
+    }
+    if (!in_array($langages, $selectedLangages)) {
+        $errors['langages'] = 'La sélection n\'est pas valide!';
     }
     // Nettoyage et récupération du pays de naissance
     $country = filter_input(INPUT_POST, 'country', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -51,6 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     //         $errors['birthday'] = 'la date n\'est pas valide !';
     //     }
     // }
+    $day = filter_input(INPUT_POST, 'day', FILTER_SANITIZE_NUMBER_INT);
+    $month = filter_input(INPUT_POST, 'month', FILTER_SANITIZE_SPECIAL_CHARS);
+    $year = filter_input(INPUT_POST, 'year', FILTER_SANITIZE_NUMBER_INT);
+    $birthdate = $year . '-' . $month . '-' . $day; // Format YYYY-MM-DD
+    
+
     // Nettoyage et vérification du lien
     $linkedin = filter_input(INPUT_POST, 'linkedin', FILTER_SANITIZE_URL);
     if (empty($linkedin)) {
@@ -68,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     }
+    // 
+
     // Nettoyage et verification du code postal
     $cp = filter_input(INPUT_POST, 'cp', FILTER_SANITIZE_NUMBER_INT);
     if (!empty($cp)) {
@@ -78,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-<span class="regular"><?= var_dump($birthday); ?></span>;
+<span class="regular"><?= var_dump($birthdate); ?></span>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -141,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <select name="day" id="day" class="select-style">
                                             <option value="">jour</option>
                                             <?php for ($day = 1; $day <= 31; $day++) : ?>
-                                                <option value="<?= $day ?>"><?= $day ?></option>
+                                                <option value="<?=$day?>" selected value =><?=$day?></option>
                                             <?php endfor; ?>
                                         </select>
                                         <!-- Sélecteur de mois -->
@@ -208,25 +237,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <!-- Champ pour l'url LinkedIn -->
                                 <div class="col-md-6">
                                     <label for="linkedin" class="regular mt-2">Lien vers LinkedIn</label>
-                                    <input id="linkedin" class="form-control" type="url" value="<?= $linkedin ?? ''; ?>" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
+                                    <input id="linkedin" class="form-control" type="url" <?= $linkedin ?? ''; ?>" name="linkedin" placeholder="Entrer votre lien vers LinkedIn">
                                     <span class="regular"><?= $errors['linkedin'] ?? ''; ?></span>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="row">
+                                <!-- Checkbox langages de programmation -->
                                 <div class="col-md-9 regular">
                                     <p class="regular mt-1">Quel langages web connaissez-vous?</p>
-                                    <div class="m0 checkbox-style"><input type="checkbox" id="html" name="html" value="html">
-                                        <label for="html">HTML/CSS</label>
-                                        <input type="checkbox" id="php" name="php" value="php">
-                                        <label for="php">PHP</label>
-                                        <input type="checkbox" id="js" name="js" value="js">
-                                        <label for="js">Javascript</label>
-                                        <input type="checkbox" id="python" name="python" value="python">
-                                        <label for="python">Python</label>
-                                        <input type="checkbox" id="other" name="other" value="other">
-                                        <label for="other">Autres</label>
+                                    <div class="m0 checkbox-style">
+                                        <?php foreach ($langages as $key => $value) : ?>
+                                            <input type="checkbox" id="<?= $key ?>" name="<?= $key ?>" value="<?= $key ?>">
+                                            <label for="<?= $key ?>"><?= $value ?></label>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
