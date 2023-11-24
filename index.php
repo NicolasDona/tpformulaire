@@ -2,6 +2,7 @@
 <?php
 // constantes
 define('POSTAL_CODE', '^[0-9]{5}$');
+define('BIRTH_DATE', '^\d{4}-\d{2}-\d{2}$'); // Format YYYY-MM-DD
 // Variables
 // Tableau des options de langages de programmation
 $langages = [
@@ -11,10 +12,12 @@ $langages = [
     'python' => 'Python',
     'other' => 'Autres'
 ];
+//tableau des genres
+$tabGenre =['monsieur', 'madame'];
 $tabCountry = ['France', 'Belgique', 'Suisse', 'Luxembourg', 'Allemagne', 'Italie', 'Espagne', 'Portugal'];
 $SelectedMonth = ['Janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'Septembre', 'Octobre', 'novembre', 'décembre'];
 // Variables pour les sélecteurs de date - (essayer de les mettres en dynamique +10 -10)
-$startYear = 1900;
+$startYear = 1913;
 $endYear = 2023;
 
 // Condition pour récupérer la méthode POST - à ne faire qu'une seule fois
@@ -32,12 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     // verification checkbox
     $selectedLangages = [];
-
     // Parcourez le tableau des langages et vérifiez chaque case à cocher
     foreach ($langages as $key => $value) {
         if (!empty($_POST[$key])) {
             // Ajoutez le langage au tableau s'il est coché
-            $selectedLangages[$key] = $value;
+            $selectedLangages[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+        }
+    }
+    foreach ($selectedLangages as $key => $value) {
+        // Vérifie si une clé existe dans un tableau
+        if (!array_key_exists($key, $langages)) {
+            // Ajouter une erreur si la clé n'existe pas dans le tableau des langages prédéfinis
+            $errors['langages'] = 'La sélection n\'est pas valide!';
         }
     }
     if (!in_array($langages, $selectedLangages)) {
@@ -63,20 +72,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     // Nettoyage et vérification de la date dans le format "Y-m-d"
-    // $birthday = filter_input(INPUT_POST, 'birthday',FILTER_SANITIZE_NUMBER_INT);
-    // if (empty($birthday)) {
-    //     $errors['birthday'] = 'La date n\'est pas renseignée !';
-    // } else {
-    //     $isOk = filter_var($birthday,);
-    //     if (!$isOk) {
-    //         $errors['birthday'] = 'la date n\'est pas valide !';
-    //     }
-    // }
-    $day = filter_input(INPUT_POST, 'day', FILTER_SANITIZE_NUMBER_INT);
-    $month = filter_input(INPUT_POST, 'month', FILTER_SANITIZE_SPECIAL_CHARS);
-    $year = filter_input(INPUT_POST, 'year', FILTER_SANITIZE_NUMBER_INT);
-    $birthdate = $year . '-' . $month . '-' . $day; // Format YYYY-MM-DD
-    
+    $birthdate = filter_input(INPUT_POST, 'birthdate', FILTER_SANITIZE_SPECIAL_CHARS);
+    $isOk = true;
+    if (!empty($birthdate)) {
+        $isOk = filter_var($birthdate, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => '/' . BIRTH_DATE . '/')));
+    }
+    if (!$isOk) {
+        $errors['birthdate'] = 'La date n\'est pas valide!';
+    }
+    // Après avoir validé le format de la date
+    if ($isOk) {
+        $currentYear = date('Y');
+        $minYear = $currentYear - 120;
+        // Extraire l'année de la date de naissance
+        $birthYear = substr($birthdate, 0, 4);
+        if ($birthYear < $minYear || $birthYear > $currentYear) {
+            $errors['birthdate'] = 'La date de naissance n\'est pas valide. L\'âge doit être inférieur à 120 ans.';
+            $isOk = false;
+        }
+    }
+    if (!$isOk) {
+        $errors['birthdate'] = 'La date n\'est pas valide!';
+    }
 
     // Nettoyage et vérification du lien
     $linkedin = filter_input(INPUT_POST, 'linkedin', FILTER_SANITIZE_URL);
@@ -94,9 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $errors['linkedin'] = 'Le lien doit être un lien LinkedIn valide !';
             }
         }
-    }
+    } 
     // 
-
     // Nettoyage et verification du code postal
     $cp = filter_input(INPUT_POST, 'cp', FILTER_SANITIZE_NUMBER_INT);
     if (!empty($cp)) {
@@ -105,9 +121,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$isOk) {
         $errors['cp'] = 'Le code postal n\'est pas valide!';
     }
+    // Nettoyage et vérification des civilités
+    $civil = filter_input(INPUT_POST, 'civil', FILTER_SANITIZE_SPECIAL_CHARS);
+    if (empty($civil)) {
+        $errors['civil'] = 'Le genre n\'est pas renseignée !';
+    }else {
+        if (!in_array($civil, $tabGenre)) {
+            $errors['civil'] = 'Le genre n\'est pas valide!';
+        }
+    }
 }
+
 ?>
-<span class="regular"><?= var_dump($birthdate); ?></span>
+<span class="regular"><?= var_dump($civil); ?></span>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -141,10 +167,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <!-- Formulaire civilité -->
                             <div class="col-md-6">
                                 <label for="civil" class="form-label regular mb-0">Civilité</label><br>
-                                <select name="civil" id="civil" class="select-style">
+                                <select name="civil" id="civil" class="select-style" selected="<?=$civil;?>">
                                     <option value="monsieur">Monsieur</option>
                                     <option value="madame">Madame</option>
                                 </select>
+                                <span class="regular"><?=$errors['civil'] ??'';?></span>
                             </div>
                             <!-- Formulaire photo de profil -->
                             <div class="col-md-6 mt-1">
@@ -159,39 +186,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="lastname" class="regular">Nom</label>
-                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" value="<?= $lastname ?? ''; ?>" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
-                                <span class="regular"><?= $errors['lastname'] ?? ''; ?></span>
+                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" value="<?=$lastname?? ''; ?>" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
+                                <span class="regular"><?=$errors['lastname'] ??'';?></span>
                             </div>
                             <div class="col-md-6">
+                                <!-- Date de naissance -->
                                 <div class="mb-3">
                                     <label for="day" class="form-label regular mb-0">Date de naissance</label>
                                     <div>
-                                        <!-- Sélecteur de jour -->
-                                        <select name="day" id="day" class="select-style">
-                                            <option value="">jour</option>
-                                            <?php for ($day = 1; $day <= 31; $day++) : ?>
-                                                <option value="<?=$day?>" selected value =><?=$day?></option>
-                                            <?php endfor; ?>
-                                        </select>
-                                        <!-- Sélecteur de mois -->
-                                        <select name="month" id="month" class="select-style">
-                                            <option value="">mois</option>
-                                            <?php foreach ($SelectedMonth as $month) : ?>
-                                                <!-- strtolower() traitement de la valeur en minuscule, cette commande peut-être supprimée si il n'y en pas besoin. -->
-                                                <option value="<?= strtolower($month) ?>"><?= $month ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <!-- Sélecteur d'année -->
-                                        <select name="year" id="year" class="select-style">
-                                            <option value="">année</option>
-                                            <?php for ($year = $startYear; $year <= $endYear; $year++) : ?>
-                                                <option value="<?= $year ?>"><?= $year ?></option>
-                                            <?php endfor; ?>
-                                        </select>
+                                        <input type="date" id="birthdate" name="birthdate" pattern="<?=BIRTH_DATE?>">
+                                        <label for="birthdate"></label>
+                                        <span class="regular"><?= $errors['birthdate']??''; ?></span>
                                         <!-- Select pour le lieu de naissance -->
                                         <span class="regular">&nbsp;Lieu de naissance</span>
                                         <select name="country" id="country" class="select-style">
-                                            <option selected value="France">France</option>
+                                            <option value="France">France</option>
                                             <option value="Belgique">Belgique</option>
                                             <option value="Suisse">Suisse</option>
                                             <option value="Luxembourg">Luxembourg</option>
