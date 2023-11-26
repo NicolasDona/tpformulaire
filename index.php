@@ -3,7 +3,6 @@
 // constantes
 define('POSTAL_CODE', '^[0-9]{5}$');
 define('BIRTH_DATE', '^\d{4}-\d{2}-\d{2}$'); // Format YYYY-MM-DD
-
 // Variables
 // Tableau des options de langages de programmation
 $langages = [
@@ -20,8 +19,6 @@ $SelectedMonth = ['Janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet
 // Variables pour les sélecteurs de date - (essayer de les mettres en dynamique +10 -10)
 $startYear = 1913;
 $endYear = 2023;
-
-
 // Condition pour récupérer la méthode POST - à ne faire qu'une seule fois
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Nettoyage et verification du Nom
@@ -35,6 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors['lastname'] = 'La donnée n\'est pas valide!';
         }
     }
+    // XP minimum char
+    $xp = filter_input(INPUT_POST, 'xp', FILTER_SANITIZE_SPECIAL_CHARS);
+    if (strlen($xp) < 100) {
+        $errors['xp'] = 'Votre expérience doit contenir au moins 100 caractères.';
+    }
+
     // Traitement de l'upload de la photo
     if (isset($_FILES["picture"]) && $_FILES["picture"]["error"] == 0) {
         // Dossier créer dans le rep du site en manuel
@@ -69,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Récupération des mots de passe
     $password1 = filter_input(INPUT_POST, 'password1', FILTER_SANITIZE_SPECIAL_CHARS);
     $password2 = filter_input(INPUT_POST, 'password2', FILTER_SANITIZE_SPECIAL_CHARS);
-
     // Validation des mots de passe
     if (empty($password1) || empty($password2)) {
         $errors['password'] = 'Le mot de passe n\'est pas renseigné !';
@@ -147,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$isOk) {
         $errors['birthdate'] = 'La date n\'est pas valide!';
     }
-
     // Nettoyage et vérification du lien
     $linkedin = filter_input(INPUT_POST, 'linkedin', FILTER_SANITIZE_URL);
     if (empty($linkedin)) {
@@ -183,11 +184,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors['civil'] = 'Le genre n\'est pas valide!';
         }
     }
+    $xp = filter_input(INPUT_POST, 'xp', FILTER_SANITIZE_SPECIAL_CHARS);
+    $xp = filter_input(INPUT_POST, 'xp', FILTER_SANITIZE_SPECIAL_CHARS);
+
+    if (strlen($xp) < 100) {
+        $errors['xp'] = 'Votre expérience doit contenir au moins 100 caractères.';
+    }
 }
-
 ?>
-<span class="regular"><?=var_dump($errors['picture']);?></span>
-
+<span class="regular"><?= var_dump($errors['picture']); ?></span>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -331,6 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="col-12">
                                     <label for="xp" class="regular">Racontez une expérience avec la programmation et/ou l'informatique que vous auriez pu avoir.</label>
                                     <textarea id="xp" class="form-control" name="xp" placeholder="Racontez votre expérience (100 caractères minimum)" minlength="100" required="required"></textarea>
+                                    <span class="regular"><?= $errors['xp'] ?? ''; ?></span>
                                 </div>
                             </div>
                         </div>
