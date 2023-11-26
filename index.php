@@ -3,6 +3,7 @@
 // constantes
 define('POSTAL_CODE', '^[0-9]{5}$');
 define('BIRTH_DATE', '^\d{4}-\d{2}-\d{2}$'); // Format YYYY-MM-DD
+
 // Variables
 // Tableau des options de langages de programmation
 $langages = [
@@ -13,12 +14,13 @@ $langages = [
     'other' => 'Autres'
 ];
 //tableau des genres
-$tabGenre =['monsieur', 'madame'];
+$tabGenre = ['monsieur', 'madame'];
 $tabCountry = ['France', 'Belgique', 'Suisse', 'Luxembourg', 'Allemagne', 'Italie', 'Espagne', 'Portugal'];
 $SelectedMonth = ['Janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'Septembre', 'Octobre', 'novembre', 'décembre'];
 // Variables pour les sélecteurs de date - (essayer de les mettres en dynamique +10 -10)
 $startYear = 1913;
 $endYear = 2023;
+
 
 // Condition pour récupérer la méthode POST - à ne faire qu'une seule fois
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -31,6 +33,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $isOk = filter_var($lastname, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => "/^[a-zA-Zéèôàîï \-]{2,50}$/")));
         if (!$isOk) {
             $errors['lastname'] = 'La donnée n\'est pas valide!';
+        }
+    }
+    // Traitement de l'upload de la photo
+    if (isset($_FILES["picture"]) && $_FILES["picture"]["error"] == 0) {
+        // Dossier créer dans le rep du site en manuel
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["picture"]["name"]);
+        $uploadOk = 1;
+        // strtolower = minuscule - pathinfo = chemin systeme - nom du ficher et recherche de l'extension dans la super globale $_FILES
+        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        // Utilisation de finfo pour vérifier le type MIME du fichier
+        // finfo classe intégrée en PHP qui est utilisée pour obtenir des informations sur un fichier. Elle fait partie de l'extension FileInfo
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        // méthode de l'objet FileInfo qui lit le contenu du fichier spécifié et détermine son type MIME.
+        $fileMimeType = $finfo->file($_FILES["picture"]["tmp_name"]);
+        if (in_array($fileMimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
+            // Fichier est une image valide
+        } else {
+            $errors['picture'] = 'Le fichier n\'est pas une image valide.';
+            $uploadOk = 0;
+        }
+        // Autres vérifications et tentative d'upload
+        if ($uploadOk == 1) {
+            if (!move_uploaded_file($_FILES["picture"]["tmp_name"], $target_file)) {
+                $errors['picture'] = 'Erreur lors du téléchargement de votre fichier.';
+            }
+        }
+    } else {
+        if (isset($_FILES["picture"]) && $_FILES["picture"]["error"] != 0) {
+            $errors['picture'] = 'Erreur lors du téléchargement du fichier.';
+        }
+    }
+    // Mot de passe et hash
+    // Récupération des mots de passe
+    $password1 = filter_input(INPUT_POST, 'password1', FILTER_SANITIZE_SPECIAL_CHARS);
+    $password2 = filter_input(INPUT_POST, 'password2', FILTER_SANITIZE_SPECIAL_CHARS);
+
+    // Validation des mots de passe
+    if (empty($password1) || empty($password2)) {
+        $errors['password'] = 'Le mot de passe n\'est pas renseigné !';
+    } elseif ($password1 !== $password2) {
+        $errors['password'] = 'Les mots de passe ne correspondent pas !';
+    } else {
+        // Vérification de la complexité du mot de passe
+        $pattern = "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/";
+        // preg_match — Effectue une recherche de correspondance avec une expression rationnelle standard
+        if (!preg_match($pattern, $password1)) {
+            $errors['password'] = 'Le mot de passe n\'est pas valide!';
+        } else {
+            // Le mot de passe est valide, procéder au hachage
+            $hashedPassword = password_hash($password1, PASSWORD_BCRYPT);
         }
     }
     // verification checkbox
@@ -111,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $errors['linkedin'] = 'Le lien doit être un lien LinkedIn valide !';
             }
         }
-    } 
+    }
     // 
     // Nettoyage et verification du code postal
     $cp = filter_input(INPUT_POST, 'cp', FILTER_SANITIZE_NUMBER_INT);
@@ -125,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $civil = filter_input(INPUT_POST, 'civil', FILTER_SANITIZE_SPECIAL_CHARS);
     if (empty($civil)) {
         $errors['civil'] = 'Le genre n\'est pas renseignée !';
-    }else {
+    } else {
         if (!in_array($civil, $tabGenre)) {
             $errors['civil'] = 'Le genre n\'est pas valide!';
         }
@@ -133,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 ?>
-<span class="regular"><?= var_dump($civil); ?></span>
+<span class="regular"><?=var_dump($errors['picture']);?></span>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -167,17 +220,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <!-- Formulaire civilité -->
                             <div class="col-md-6">
                                 <label for="civil" class="form-label regular mb-0">Civilité</label><br>
-                                <select name="civil" id="civil" class="select-style" selected="<?=$civil;?>">
+                                <select name="civil" id="civil" class="select-style" selected="<?= $civil; ?>">
                                     <option value="monsieur">Monsieur</option>
                                     <option value="madame">Madame</option>
                                 </select>
-                                <span class="regular"><?=$errors['civil'] ??'';?></span>
+                                <span class="regular"><?= $errors['civil'] ?? ''; ?></span>
                             </div>
                             <!-- Formulaire photo de profil -->
                             <div class="col-md-6 mt-1">
                                 <span class="regular">Photo de profil</span><br>
                                 <label for="picture" class="custom-file-upload">Choisir un fichier</label><br>
                                 <input id="picture" class="regular custom-file-upload" type="file" accept="image/png, image/jpeg" name="picture" required="required" capture="user" style="display: none;">
+                                <span class="regular"><?= $errors['picture'] ?? ''; ?></span>
                             </div>
                         </div>
                     </div>
@@ -186,17 +240,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="lastname" class="regular">Nom</label>
-                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" value="<?=$lastname?? ''; ?>" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
-                                <span class="regular"><?=$errors['lastname'] ??'';?></span>
+                                <input id="lastname" class="form-control" pattern="^[a-zA-Zéèôàîï \-]{2,50}$" value="<?= $lastname ?? ''; ?>" type="text" name="lastname" placeholder="Entrer votre nom" minlength="2" maxlength="40">
+                                <span class="regular"><?= $errors['lastname'] ?? ''; ?></span>
                             </div>
                             <div class="col-md-6">
                                 <!-- Date de naissance -->
                                 <div class="mb-3">
                                     <label for="day" class="form-label regular mb-0">Date de naissance</label>
                                     <div>
-                                        <input type="date" id="birthdate" name="birthdate" pattern="<?=BIRTH_DATE?>">
+                                        <input type="date" id="birthdate" name="birthdate" pattern="<?= BIRTH_DATE ?>">
                                         <label for="birthdate"></label>
-                                        <span class="regular"><?= $errors['birthdate']??''; ?></span>
+                                        <span class="regular"><?= $errors['birthdate'] ?? ''; ?></span>
                                         <!-- Select pour le lieu de naissance -->
                                         <span class="regular">&nbsp;Lieu de naissance</span>
                                         <select name="country" id="country" class="select-style">
@@ -220,6 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <!-- Premier champ pour le mot de passe -->
                                     <label for="password1" class="form-label regular">Mot de passe</label>
                                     <input type="password" class="form-control" id="password1" name="password1" placeholder="Entrer votre mot de passe" minlength="2" required="required">
+                                    <span class="regular"><?= $errors['password'] ?? ''; ?></span>
                                     <div id="nudge">
                                         <span class="badge  regular d-none">Faible</span>
                                         <span class="badge  regular d-none">Moyen</span>
