@@ -184,10 +184,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors['civil'] = 'Le genre n\'est pas valide!';
         }
     }
+    // Nettoyage du message d'expérience
     $xp = filter_input(INPUT_POST, 'xp', FILTER_SANITIZE_SPECIAL_CHARS);
-    $xp = filter_input(INPUT_POST, 'xp', FILTER_SANITIZE_SPECIAL_CHARS);
-
-    if (strlen($xp) < 100) {
+    if (empty($xp)) {
+        $errors['xp'] = 'Le champ expérience est requis.';
+    } elseif (strlen($xp) < 100) {
+        // Vérifie la longueur de la chaîne si elle n'est pas vide
         $errors['xp'] = 'Votre expérience doit contenir au moins 100 caractères.';
     }
 }
